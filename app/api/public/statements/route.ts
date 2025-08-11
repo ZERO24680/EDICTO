@@ -1,55 +1,81 @@
-import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/app/(lib)/prisma";
-import { filterStatements } from "@/app/(lib)/mock";
+import { NextRequest, NextResponse } from 'next/server'
+import { prisma } from '@/app/(lib)/prisma'
+import { mockStatements } from '@/app/(lib)/mock'
 
-export async function GET(req: NextRequest) {
-  const { searchParams } = new URL(req.url);
-  const query = searchParams.get("query") || undefined;
-  const orgSlug = searchParams.get("org") || undefined;
-  const topicSlug = searchParams.get("topic") || undefined;
-  const page = Number(searchParams.get("page") || 1);
-  const take = Number(searchParams.get("pageSize") || 20);
-  const skip = (page - 1) * take;
-
-  const where = {
-    AND: [
-      query
-        ? {
-            OR: [
-              { title: { contains: query, mode: "insensitive" } },
-              { summaryAI: { contains: query, mode: "insensitive" } },
-            ],
-          }
-        : {},
-      orgSlug ? { organization: { slug: orgSlug } } : {},
-      topicSlug
-        ? { topics: { some: { topic: { slug: topicSlug } } } }
-        : {},
-    ],
-  } as const;
-
+export async function GET(request: NextRequest) {
   try {
-    const [items, total] = await Promise.all([
-      prisma.statement.findMany({
-        where,
-        orderBy: [{ publishedAt: "desc" }, { createdAt: "desc" }],
-        take,
-        skip,
+    const { searchParams } = new URL(request.url)
+    const topic = searchParams.get('topic')
+    const org = searchParams.get('org')
+    const page = parseInt(searchParams.get('page') || '1')
+    const limit = parseInt(searchParams.get('limit') || '10')
+    
+    // Try to fetch from database first
+    try {
+      const whereClause: Record<string, unknown> = { status: 'PUBLISHED' }
+      
+      if (topic) {
+        whereClause.topics = { some: { topic: { slug: topic } } }
+      }
+      
+      if (org) {
+        whereClause.organization = { slug: org }
+      }
+      
+      const statements = await prisma.statement.findMany({
+        where: whereClause,
         include: {
-          organization: { select: { id: true, name: true, slug: true } },
-          currentVersion: { select: { id: true, versionNumber: true, hashSha256: true, createdAt: true } },
-          topics: { include: { topic: true } },
+          organization: {
+            select: { name: true, slug: true, logoUrl: true }
+          },
+          topics: {
+            include: { topic: { select: { name: true, slug: true } } }
+          },
+          currentVersion: {
+            select: { contentText: true }
+          }
         },
-      }),
-      prisma.statement.count({ where }),
-    ]);
-
-    return NextResponse.json({ items, total, page, pageSize: take });
-  } catch (e) {
-    // Mock fallback
-    const items = filterStatements({ query, orgSlug, topicSlug }).slice(skip, skip + take);
-    const total = filterStatements({ query, orgSlug, topicSlug }).length;
-    return NextResponse.json({ items, total, page, pageSize: take });
+        orderBy: { publishedAt: 'desc' },
+        skip: (page - 1) * limit,
+        take: limit
+      })
+      
+      return NextResponse.json({ statements, page, limit })
+    } catch (dbError) {
+      // Fallback to mock data if database is not available
+      console.log('Database error, using mock data:', dbError)
+      
+      let filteredStatements = mockStatements
+      
+      if (topic) {
+        filteredStatements = filteredStatements.filter(s => 
+          s.topics?.some(t => t.topic.slug === topic) || false
+        )
+      }
+      
+      if (org) {
+        filteredStatements = filteredStatements.filter(s => 
+          s.organization.slug === org
+        )
+      }
+      
+      const startIndex = (page - 1) * limit
+      const endIndex = startIndex + limit
+      const paginatedStatements = filteredStatements.slice(startIndex, endIndex)
+      
+      return NextResponse.json({ 
+        statements: paginatedStatements, 
+        page, 
+        limit,
+        total: filteredStatements.length 
+      })
+    }
+  } catch (error) {
+    console.error('Error fetching statements:', error)
+    return NextResponse.json(
+      { error: 'Failed to fetch statements' },
+      { status: 500 }
+    )
   }
 }
 

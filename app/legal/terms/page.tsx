@@ -1,110 +1,143 @@
 export default function TermsPage() {
   return (
-    <main className="max-w-4xl mx-auto px-6 py-16 space-y-6">
-      <h1 className="font-[var(--font-eb-garamond)] text-4xl">EDICTO – Terms of Use</h1>
-      <p>Effective date: [Insert date]</p>
-      <p>Last updated: [Insert date]</p>
-
-      <section>
-        <h2 className="font-[var(--font-eb-garamond)] text-2xl">1. Introduction</h2>
-        <p>Welcome to EDICTO, operated by EDICTO, a subsidiary of AC Global Group.</p>
-        <p>By accessing or using our platform, you agree to comply with and be bound by these Terms of Use. If you do not agree, you must not use EDICTO.</p>
-      </section>
-
-      <section>
-        <h2 className="font-[var(--font-eb-garamond)] text-2xl">2. Definitions</h2>
-        <p>
-          "Platform": the EDICTO website, services, and APIs. "User": any individual or entity using the Platform. "Organization": a verified entity (company,
-          institution, NGO) that publishes official statements on EDICTO. "Statement": an official communication published by a verified Organization. "We",
-          "Us", "Our": EDICTO.
-        </p>
-      </section>
-
-      <section>
-        <h2 className="font-[var(--font-eb-garamond)] text-2xl">3. Eligibility</h2>
-        <ul className="list-disc ml-5 space-y-1">
-          <li>You must be at least 18 years old.</li>
-          <li>If registering on behalf of an Organization, you must have authority to do so.</li>
-          <li>You must provide accurate, complete, and up-to-date information.</li>
-        </ul>
-      </section>
-
-      <section>
-        <h2 className="font-[var(--font-eb-garamond)] text-2xl">4. Account Types</h2>
-        <p>Organization Accounts: for verified entities that publish Statements. User Accounts: for individuals (journalists, researchers, general public).</p>
-        <p>You are responsible for safeguarding your login credentials and for all activity under your account.</p>
-      </section>
-
-      <section>
-        <h2 className="font-[var(--font-eb-garamond)] text-2xl">5. Verified Organizations</h2>
-        <p>To create a verified Organization profile you must complete our verification process (domain email, DNS records, legal documents) and ensure all published Statements are accurate and official. We may suspend or revoke verification if misuse is detected.</p>
-      </section>
-
-      <section>
-        <h2 className="font-[var(--font-eb-garamond)] text-2xl">6. Publishing Statements</h2>
-        <ul className="list-disc ml-5 space-y-1">
-          <li>You confirm each Statement is an official, authorized communication from your Organization.</li>
-          <li>You grant EDICTO a non-exclusive, worldwide, royalty-free license to store, display, and archive the Statement.</li>
-          <li>Statements must not contain unlawful, defamatory, or misleading content.</li>
-        </ul>
-      </section>
-
-      <section>
-        <h2 className="font-[var(--font-eb-garamond)] text-2xl">7. Prohibited Conduct</h2>
-        <ul className="list-disc ml-5 space-y-1">
-          <li>Use the Platform for illegal purposes.</li>
-          <li>Impersonate another person or Organization.</li>
-          <li>Publish false or misleading Statements.</li>
-          <li>Attempt to breach the security or integrity of the Platform.</li>
-          <li>Use automated systems to scrape or overload the service without permission.</li>
-        </ul>
-      </section>
-
-      <section>
-        <h2 className="font-[var(--font-eb-garamond)] text-2xl">8. Intellectual Property</h2>
-        <p>The EDICTO platform, brand, and design are protected by intellectual property laws. Statements remain the property of their respective owners but are licensed to EDICTO for display and archiving.</p>
-      </section>
-
-      <section>
-        <h2 className="font-[var(--font-eb-garamond)] text-2xl">9. Paid Plans and Billing</h2>
-        <ul className="list-disc ml-5 space-y-1">
-          <li>Some features are available only through a paid subscription.</li>
-          <li>Prices and features are listed on our Pricing page. Payments are processed via third-party providers (e.g., Stripe).</li>
-          <li>Subscriptions renew automatically unless canceled before the next billing cycle.</li>
-        </ul>
-      </section>
-
-      <section>
-        <h2 className="font-[var(--font-eb-garamond)] text-2xl">10. Disclaimers</h2>
-        <p>EDICTO does not edit or alter Statements from verified Organizations but cannot guarantee their absolute accuracy. The Platform is provided “as is” and we disclaim all warranties to the maximum extent permitted by law.</p>
-      </section>
-
-      <section>
-        <h2 className="font-[var(--font-eb-garamond)] text-2xl">11. Limitation of Liability</h2>
-        <p>To the fullest extent permitted by law, EDICTO shall not be liable for any indirect, incidental, or consequential damages arising from your use of the Platform. Our total liability shall not exceed the amount you have paid to us in the past 12 months.</p>
-      </section>
-
-      <section>
-        <h2 className="font-[var(--font-eb-garamond)] text-2xl">12. Termination</h2>
-        <p>We may suspend or terminate your account if you violate these Terms, if we suspect fraudulent or harmful activity, or at our discretion with reasonable notice where possible.</p>
-      </section>
-
-      <section>
-        <h2 className="font-[var(--font-eb-garamond)] text-2xl">13. Changes to These Terms</h2>
-        <p>We may update these Terms from time to time. Changes will be posted on this page with a new “Last updated” date. Continued use of the Platform after changes constitutes acceptance.</p>
-      </section>
-
-      <section>
-        <h2 className="font-[var(--font-eb-garamond)] text-2xl">14. Governing Law</h2>
-        <p>These Terms shall be governed by and construed in accordance with the laws of [Insert Jurisdiction], without regard to conflict of law principles.</p>
-      </section>
-
-      <section>
-        <h2 className="font-[var(--font-eb-garamond)] text-2xl">15. Contact Us</h2>
-        <p>Email: legal@edicto.com (placeholder)</p>
-        <p>Postal address: [Insert legal address]</p>
-      </section>
-    </main>
-  );
+    <div className="min-h-screen bg-ivory">
+      <div className="container mx-auto px-4 py-8 max-w-4xl">
+        <h1 className="text-4xl font-serif text-navy mb-8">Terms of Use</h1>
+        
+        <div className="prose prose-lg max-w-none">
+          <p className="text-lg text-gray-700 mb-6">
+            These Terms of Use (&ldquo;Terms&rdquo;) govern your use of EDICTO (&ldquo;the Service&rdquo;), 
+            operated by EDICTO (&ldquo;we,&rdquo; &ldquo;us,&rdquo; or &ldquo;our&rdquo;). 
+            By accessing or using our Service, you agree to be bound by these Terms.
+          </p>
+          
+          <h2 className="text-2xl font-serif text-navy mt-8 mb-4">1. Definitions</h2>
+          <ul className="list-disc pl-6 mb-6 space-y-2">
+            <li><strong>Service:</strong> EDICTO, the official register of verified statements</li>
+            <li><strong>User:</strong> Any individual or entity using the Service</li>
+            <li><strong>Organization:</strong> A verified entity that publishes statements</li>
+            <li><strong>Statement:</strong> Official communication published by an Organization</li>
+            <li><strong>Content:</strong> Any information, data, or material on the Service</li>
+          </ul>
+          
+          <h2 className="text-2xl font-serif text-navy mt-8 mb-4">2. Eligibility</h2>
+          <p className="mb-4">
+            You must be at least 18 years old to use the Service. By using the Service, 
+            you represent and warrant that you meet this requirement.
+          </p>
+          
+          <h2 className="text-2xl font-serif text-navy mt-8 mb-4">3. Account Types</h2>
+          <div className="mb-6">
+            <h3 className="text-xl font-semibold text-navy mb-2">Individual Users</h3>
+            <p className="mb-2">Free access to browse and search statements with limitations:</p>
+            <ul className="list-disc pl-6 mb-4 space-y-1">
+              <li>Limited search history (30 days)</li>
+              <li>Follow up to 5 organizations</li>
+              <li>Basic alerts only</li>
+            </ul>
+            
+            <h3 className="text-xl font-semibold text-navy mb-2">Pro Users</h3>
+            <p className="mb-2">Enhanced features with subscription:</p>
+            <ul className="list-disc pl-6 mb-4 space-y-1">
+              <li>Unlimited search history</li>
+              <li>Advanced search filters</li>
+              <li>Export capabilities</li>
+              <li>Unlimited follows and alerts</li>
+            </ul>
+            
+            <h3 className="text-xl font-semibold text-navy mb-2">Organizations</h3>
+            <p className="mb-2">Verified entities that can publish statements:</p>
+            <ul className="list-disc pl-6 mb-4 space-y-1">
+              <li>Must complete verification process</li>
+              <li>Domain ownership verification</li>
+              <li>Admin review required</li>
+            </ul>
+          </div>
+          
+          <h2 className="text-2xl font-serif text-navy mt-8 mb-4">4. Verified Organizations</h2>
+          <p className="mb-4">
+            Organizations must complete a verification process to publish statements:
+          </p>
+          <ul className="list-disc pl-6 mb-6 space-y-2">
+            <li>Provide official domain email</li>
+            <li>Verify domain ownership via DNS TXT record</li>
+            <li>Submit required documentation</li>
+            <li>Pass admin review</li>
+          </ul>
+          
+          <h2 className="text-2xl font-serif text-navy mt-8 mb-4">5. Publishing Statements</h2>
+          <p className="mb-4">
+            Verified organizations may publish official statements subject to:
+          </p>
+          <ul className="list-disc pl-6 mb-6 space-y-2">
+            <li>Content must be official organizational communication</li>
+            <li>No misleading or false information</li>
+            <li>Compliance with applicable laws</li>
+            <li>Respect for intellectual property rights</li>
+          </ul>
+          
+          <h2 className="text-2xl font-serif text-navy mt-8 mb-4">6. Prohibited Conduct</h2>
+          <p className="mb-4">You agree not to:</p>
+          <ul className="list-disc pl-6 mb-6 space-y-2">
+            <li>Violate any applicable laws or regulations</li>
+            <li>Infringe on intellectual property rights</li>
+            <li>Attempt to gain unauthorized access to the Service</li>
+            <li>Interfere with the Service&apos;s operation</li>
+            <li>Use the Service for spam or harassment</li>
+            <li>Publish false or misleading information</li>
+          </ul>
+          
+          <h2 className="text-2xl font-serif text-navy mt-8 mb-4">7. Intellectual Property</h2>
+          <p className="mb-4">
+            The Service and its original content are owned by EDICTO and protected by 
+            copyright, trademark, and other intellectual property laws. Organizations 
+            retain rights to their published statements.
+          </p>
+          
+          <h2 className="text-2xl font-serif text-navy mt-8 mb-4">8. Paid Plans</h2>
+          <p className="mb-4">
+            Pro and Team plans are billed monthly or annually. You may cancel at any time. 
+            Refunds are handled according to our refund policy.
+          </p>
+          
+          <h2 className="text-2xl font-serif text-navy mt-8 mb-4">9. Disclaimers</h2>
+          <p className="mb-4">
+            The Service is provided &ldquo;as is&rdquo; without warranties. We do not guarantee 
+            the accuracy, completeness, or reliability of any content.
+          </p>
+          
+          <h2 className="text-2xl font-serif text-navy mt-8 mb-4">10. Limitation of Liability</h2>
+          <p className="mb-4">
+            EDICTO shall not be liable for any indirect, incidental, special, or 
+            consequential damages arising from your use of the Service.
+          </p>
+          
+          <h2 className="text-2xl font-serif text-navy mt-8 mb-4">11. Termination</h2>
+          <p className="mb-4">
+            We may terminate or suspend your access to the Service at any time for 
+            violations of these Terms or for any other reason.
+          </p>
+          
+          <h2 className="text-2xl font-serif text-navy mt-8 mb-4">12. Changes to Terms</h2>
+          <p className="mb-4">
+            We may modify these Terms at any time. Continued use of the Service 
+            constitutes acceptance of the modified Terms.
+          </p>
+          
+          <h2 className="text-2xl font-serif text-navy mt-8 mb-4">13. Contact Information</h2>
+          <p className="mb-6">
+            If you have questions about these Terms, please contact us at{' '}
+            <a href="/contact" className="text-gold hover:text-navy underline">
+              our contact page
+            </a>.
+          </p>
+          
+          <p className="text-sm text-gray-600 mt-8">
+            Last updated: {new Date().toLocaleDateString()}
+          </p>
+        </div>
+      </div>
+    </div>
+  )
 }
 

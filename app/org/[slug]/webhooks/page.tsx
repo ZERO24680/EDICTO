@@ -1,11 +1,23 @@
-type Params = { params: { slug: string } };
+interface PageProps {
+  params: Promise<{
+    slug: string
+  }>
+}
 
-export default function OrgWebhooksPage({ params }: Params) {
+export default async function OrgWebhooksPage({ params }: PageProps) {
+  const { slug } = await params
+  
   return (
-    <main className="max-w-5xl mx-auto px-6 py-16 space-y-6">
-      <h1 className="font-[var(--font-eb-garamond)] text-3xl">Webhooks — {params.slug}</h1>
-      <p>Manage webhook endpoints for events (statement.published, statement.updated).</p>
-    </main>
-  );
+    <div className="min-h-screen bg-ivory">
+      <div className="container mx-auto px-4 py-8">
+        <h1 className="text-4xl font-serif text-navy mb-8">
+          Webhooks — {slug}
+        </h1>
+        <p className="text-lg text-gray-700">
+          Configure webhook endpoints for real-time notifications.
+        </p>
+      </div>
+    </div>
+  )
 }
 

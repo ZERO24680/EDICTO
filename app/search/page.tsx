@@ -1,39 +1,108 @@
-import Link from "next/link";
+'use client'
 
-type SearchParams = { searchParams: { q?: string } };
+import { useState, Suspense } from 'react'
+import { useSearchParams } from 'next/navigation'
 
-export default async function SearchPage({ searchParams }: SearchParams) {
-  const q = searchParams.q || "";
-  let items: any[] = [];
-  try {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || ""}/api/public/statements?query=${encodeURIComponent(q)}&pageSize=20`, { next: { revalidate: 10 } });
-    const data = await res.json();
-    items = data.items || [];
-  } catch {}
+interface Statement {
+  id: string
+  title: string
+  summaryAI?: string | null
+  contentText?: string | null
+  organization?: {
+    name: string
+  }
+  publishedAt: string
+}
+
+function SearchContent() {
+  const searchParams = useSearchParams()
+  const [query, setQuery] = useState(searchParams.get('q') || '')
+  const [results, setResults] = useState<Statement[]>([])
+  const [isSearching, setIsSearching] = useState(false)
+
+  const handleSearch = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!query.trim()) return
+    
+    setIsSearching(true)
+    try {
+      const response = await fetch(`/api/public/statements?query=${encodeURIComponent(query)}`)
+      const data = await response.json()
+      setResults(data.statements || [])
+    } catch (error) {
+      console.error('Search failed:', error)
+    } finally {
+      setIsSearching(false)
+    }
+  }
 
   return (
-    <main className="max-w-5xl mx-auto px-6 py-10 space-y-6">
-      <h1 className="font-[var(--font-eb-garamond)] text-3xl">Search</h1>
-      <form action="/search" className="flex bg-white rounded shadow overflow-hidden">
-        <input name="q" defaultValue={q} placeholder="Search statements..." className="flex-1 px-4 py-3 text-black outline-none" />
-        <button className="px-4 py-3 bg-[var(--gold)] text-[var(--navy)] font-medium">Search</button>
-      </form>
-
-      <div className="grid md:grid-cols-2 gap-4">
-        {items.length === 0 && <p>No results.</p>}
-        {items.map((s) => (
-          <article key={s.id} className="border rounded p-4 bg-white/40">
-            <div className="text-sm opacity-80">{s.organization?.name}</div>
-            <h3 className="text-lg font-medium">{s.title}</h3>
-            <div className="text-sm opacity-70">{s.publishedAt ? new Date(s.publishedAt).toLocaleDateString() : "Draft"}</div>
-          </article>
-        ))}
+    <div className="min-h-screen bg-ivory">
+      <div className="container mx-auto px-4 py-8">
+        <h1 className="text-4xl font-serif text-navy mb-8">Recherche</h1>
+        
+        <form onSubmit={handleSearch} className="mb-8">
+          <div className="flex gap-4 max-w-2xl">
+            <input
+              type="text"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Rechercher par mot-clé, organisation ou sujet..."
+              className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gold"
+            />
+            <button
+              type="submit"
+              disabled={isSearching}
+              className="px-6 py-3 bg-navy text-ivory rounded-lg hover:bg-navy/90 disabled:opacity-50"
+            >
+              {isSearching ? 'Recherche...' : 'Rechercher'}
+            </button>
+          </div>
+        </form>
+        
+        {results.length > 0 && (
+          <div className="space-y-4">
+            <h2 className="text-2xl font-serif text-navy mb-4">
+              Résultats ({results.length})
+            </h2>
+            {results.map((statement) => (
+              <div key={statement.id} className="bg-white p-6 rounded-lg border border-gray-200">
+                <h3 className="text-lg font-semibold text-navy mb-2">
+                  {statement.title}
+                </h3>
+                <p className="text-gray-700 mb-3">
+                  {statement.summaryAI || statement.contentText?.substring(0, 200)}
+                </p>
+                <div className="flex items-center gap-4 text-sm text-gray-600">
+                  <span>{statement.organization?.name}</span>
+                  <span>{new Date(statement.publishedAt).toLocaleDateString()}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+        
+        {query && results.length === 0 && !isSearching && (
+          <div className="text-center py-12">
+            <p className="text-gray-600 text-lg">
+              Aucun résultat trouvé pour &ldquo;{query}&rdquo;
+            </p>
+          </div>
+        )}
       </div>
+    </div>
+  )
+}
 
-      <div className="pt-6">
-        <Link href="/" className="underline">Back to Home</Link>
+export default function SearchPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-ivory flex items-center justify-center">
+        <div className="text-lg text-gray-600">Chargement...</div>
       </div>
-    </main>
-  );
+    }>
+      <SearchContent />
+    </Suspense>
+  )
 }
 

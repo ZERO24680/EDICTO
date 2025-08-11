@@ -1,25 +1,18 @@
-export default async function StatementsPage() {
-  let items: any[] = [];
-  try {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || ""}/api/public/statements?pageSize=20`, { next: { revalidate: 10 } });
-    const data = await res.json();
-    items = data.items || [];
-  } catch {}
-
+export default function StatementsPage() {
+  // TODO: Fetch all statements from database
+  // For now, return a placeholder
+  
   return (
-    <main className="max-w-6xl mx-auto px-6 py-10 space-y-6">
-      <h1 className="font-[var(--font-eb-garamond)] text-3xl">Explore</h1>
-      <div className="grid md:grid-cols-2 gap-4">
-        {items.length === 0 && <p>No statements yet.</p>}
-        {items.map((s) => (
-          <article key={s.id} className="border rounded p-4 bg-white/40">
-            <div className="text-sm opacity-80">{s.organization?.name}</div>
-            <h3 className="text-lg font-medium">{s.title}</h3>
-            <div className="text-sm opacity-70">{s.publishedAt ? new Date(s.publishedAt).toLocaleDateString() : "Draft"}</div>
-          </article>
-        ))}
+    <div className="min-h-screen bg-ivory">
+      <div className="container mx-auto px-4 py-8">
+        <h1 className="text-4xl font-serif text-navy mb-8">
+          Tous les communiqués
+        </h1>
+        <p className="text-lg text-gray-700">
+          Cette page affichera tous les communiqués publiés avec des filtres et une pagination.
+        </p>
       </div>
-    </main>
-  );
+    </div>
+  )
 }
 

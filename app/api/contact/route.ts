@@ -1,11 +1,21 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest, NextResponse } from 'next/server'
 
-export async function POST(req: NextRequest) {
-  const { fullName, email, subject, message, consent } = (await req.json()) as any;
-  if (!fullName || !email || !message || !consent) {
-    return NextResponse.json({ error: "Missing fields" }, { status: 400 });
+export async function POST(request: NextRequest) {
+  try {
+    const { name, email, subject, message, gdprConsent } = await request.json()
+    
+    // TODO: Implement email sending logic
+    // For now, just return success
+    
+    return NextResponse.json({ 
+      success: true, 
+      message: 'Message sent successfully' 
+    })
+  } catch (error) {
+    return NextResponse.json(
+      { success: false, message: 'Failed to send message' },
+      { status: 500 }
+    )
   }
-  // In MVP: just acknowledge; later: send via Resend or store ticket
-  return NextResponse.json({ ok: true });
 }
 

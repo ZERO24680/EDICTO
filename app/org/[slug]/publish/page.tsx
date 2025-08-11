@@ -1,11 +1,23 @@
-type Params = { params: { slug: string } };
+interface PageProps {
+  params: Promise<{
+    slug: string
+  }>
+}
 
-export default function OrgPublishPage({ params }: Params) {
+export default async function OrgPublishPage({ params }: PageProps) {
+  const { slug } = await params
+  
   return (
-    <main className="max-w-5xl mx-auto px-6 py-16 space-y-6">
-      <h1 className="font-[var(--font-eb-garamond)] text-3xl">Publish — {params.slug}</h1>
-      <p>Markdown editor and PDF upload to be implemented.</p>
-    </main>
-  );
+    <div className="min-h-screen bg-ivory">
+      <div className="container mx-auto px-4 py-8">
+        <h1 className="text-4xl font-serif text-navy mb-8">
+          Publier — {slug}
+        </h1>
+        <p className="text-lg text-gray-700">
+          Publish new statements and manage existing ones.
+        </p>
+      </div>
+    </div>
+  )
 }
 
