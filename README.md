@@ -1,4 +1,34 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+EDICTO — The official register of verified statements.
+
+Stack
+- Next.js 14 App Router, React Server Components, TypeScript
+- Tailwind CSS v4
+- Prisma + PostgreSQL
+- NextAuth, Stripe, Resend, S3-compatible storage
+
+Getting Started
+1) Install dependencies
+
+```bash
+npm install
+```
+
+2) Configure environment
+
+Create `.env` from `.env.example` and set `DATABASE_URL` (Postgres) and other keys.
+
+3) Prisma
+
+```bash
+npx prisma generate
+npx prisma db push
+```
+
+4) Run the dev server
+
+```bash
+npm run dev
+```
 
 ## Getting Started
 
@@ -16,7 +46,7 @@ bun dev
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+You can start editing by modifying files under `app/`.
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 

@@ -1,0 +1,9 @@
+export default function BillingPage() {
+  return (
+    <main className="max-w-5xl mx-auto px-6 py-16 space-y-6">
+      <h1 className="font-[var(--font-eb-garamond)] text-3xl">Billing</h1>
+      <p>Stripe customer portal integration planned.</p>
+    </main>
+  );
+}
+

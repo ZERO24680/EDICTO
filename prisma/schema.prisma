@@ -1,0 +1,459 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// =============================================================
+// Enums
+// =============================================================
+
+enum Plan {
+  FREE
+  PRO
+  TEAM
+}
+
+enum VerificationStatus {
+  PENDING
+  VERIFIED
+  REJECTED
+}
+
+enum StatementStatus {
+  PUBLISHED
+  DRAFT
+  RETIRED
+}
+
+enum AlertScope {
+  ORG
+  TOPIC
+  QUERY
+}
+
+enum Channel {
+  EMAIL
+  PUSH
+  SLACK
+}
+
+enum OwnerType {
+  USER
+  ORG
+}
+
+enum IntegrationType {
+  SLACK
+  NOTION
+  AIRTABLE
+}
+
+enum ActorType {
+  USER
+  ORG
+  ADMIN
+}
+
+enum WebhookEvent {
+  statement_published
+  statement_updated
+}
+
+// =============================================================
+// Models
+// =============================================================
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String?
+  emailVerified DateTime?
+  plan      Plan     @default(FREE)
+  locale    String   @default("en")
+  createdAt DateTime @default(now())
+
+  follows          Follow[]
+  savedStatements  SavedStatement[]
+  savedSearches    SavedSearch[]
+  alertRules       AlertRule[]
+  notifications    Notification[]
+  apiKeys          ApiKey[]
+  integrations     Integration[]
+  auditLogs        AuditLog[] @relation("UserAuditLogs")
+  billingSubs      BillingSubscription[]
+  webhookEndpoints WebhookEndpoint[]
+  viewLogs         ViewLog[]
+  verificationReviews VerificationRequest[] @relation("VerificationReviewer")
+  sessions      Session[]
+  accounts      Account[]
+}
+
+model Organization {
+  id                 String              @id @default(cuid())
+  name               String
+  slug               String              @unique
+  logoUrl            String?
+  bannerUrl          String?
+  website            String?
+  bio                String?
+  country            String?
+  sector             String?
+  verifiedAt         DateTime?
+  verificationStatus VerificationStatus   @default(PENDING)
+  createdAt          DateTime            @default(now())
+
+  domains     OrgDomain[]
+  statements  Statement[]
+  followers   Follow[]
+  apiKeys     ApiKey[]
+  auditLogs   AuditLog[] @relation("OrgAuditLogs")
+  webhooks    WebhookEndpoint[]
+  verificationRequests VerificationRequest[]
+  alertRules  AlertRule[]
+  billingSubscriptions BillingSubscription[]
+}
+
+model OrgDomain {
+  id             String        @id @default(cuid())
+  organizationId String
+  domain         String
+  verifiedAt     DateTime?
+  dnsToken       String
+  status         VerificationStatus @default(PENDING)
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@unique([organizationId, domain])
+  @@index([domain])
+}
+
+model Statement {
+  id               String           @id @default(cuid())
+  organizationId   String
+  slug             String
+  title            String
+  summaryAI        String?
+  language         String           @default("en")
+  status           StatementStatus  @default(DRAFT)
+  publishedAt      DateTime?
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+  currentVersionId String?          @unique
+
+  // FTS: title vector (maintained by trigger)
+  titleVector      Unsupported("tsvector")?
+
+  organization Organization   @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  versions      StatementVersion[]
+  currentVersion StatementVersion? @relation("CurrentVersion", fields: [currentVersionId], references: [id])
+  topics        StatementTopic[]
+  tags          StatementTag[]
+  views         ViewLog[]
+  savedBy       SavedStatement[]
+
+  @@unique([organizationId, slug])
+  @@index([organizationId])
+  @@index([publishedAt])
+  @@index([title])
+}
+
+model StatementVersion {
+  id              String   @id @default(cuid())
+  statementId     String
+  versionNumber   Int
+  contentMarkdown String?
+  contentText     String
+  pdfUrl          String?
+  attachmentsJson Json?
+  hashSha256      String
+  createdAt       DateTime @default(now())
+
+  // FTS: content vector (maintained by trigger)
+  contentVector   Unsupported("tsvector")?
+
+  statement       Statement @relation(fields: [statementId], references: [id], onDelete: Cascade)
+  asCurrentOf     Statement? @relation("CurrentVersion")
+
+  @@unique([statementId, versionNumber])
+  @@index([statementId])
+}
+
+model Topic {
+  id    String @id @default(cuid())
+  name  String @unique
+  slug  String @unique
+
+  statements StatementTopic[]
+  alertRules AlertRule[]
+}
+
+model StatementTopic {
+  statementId String
+  topicId     String
+
+  statement Statement @relation(fields: [statementId], references: [id], onDelete: Cascade)
+  topic     Topic     @relation(fields: [topicId], references: [id], onDelete: Cascade)
+
+  @@id([statementId, topicId])
+  @@index([topicId])
+}
+
+model Tag {
+  id   String @id @default(cuid())
+  name String @unique
+  slug String @unique
+
+  statements StatementTag[]
+}
+
+model StatementTag {
+  statementId String
+  tagId       String
+
+  statement Statement @relation(fields: [statementId], references: [id], onDelete: Cascade)
+  tag       Tag       @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([statementId, tagId])
+  @@index([tagId])
+}
+
+model Follow {
+  id             String   @id @default(cuid())
+  userId         String
+  organizationId String
+  createdAt      DateTime @default(now())
+
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, organizationId])
+  @@index([organizationId])
+}
+
+model SavedStatement {
+  id          String   @id @default(cuid())
+  userId      String
+  statementId String
+  createdAt   DateTime @default(now())
+
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  statement Statement @relation(fields: [statementId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, statementId])
+  @@index([statementId])
+}
+
+model SavedSearch {
+  id        String   @id @default(cuid())
+  userId    String
+  name      String
+  queryJson Json
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model AlertRule {
+  id        String     @id @default(cuid())
+  userId    String
+  scope     AlertScope
+  orgId     String?
+  topicId   String?
+  queryJson Json?
+  channels  Channel[]
+  isActive  Boolean   @default(true)
+  createdAt DateTime  @default(now())
+
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  org   Organization? @relation(fields: [orgId], references: [id])
+  topic Topic?        @relation(fields: [topicId], references: [id])
+
+  @@index([userId])
+  @@index([scope])
+}
+
+model Notification {
+  id          String   @id @default(cuid())
+  userId      String
+  type        String
+  payloadJson Json
+  readAt      DateTime?
+  createdAt   DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
+}
+
+model ApiKey {
+  id               String   @id @default(cuid())
+  userId           String?
+  organizationId   String?
+  name             String
+  keyPrefix        String
+  hashedKey        String
+  scopes           String[]
+  createdAt        DateTime @default(now())
+
+  user         User?         @relation(fields: [userId], references: [id])
+  organization Organization? @relation(fields: [organizationId], references: [id])
+
+  @@index([keyPrefix])
+}
+
+model WebhookEndpoint {
+  id         String      @id @default(cuid())
+  userId     String?
+  organizationId String?
+  url        String
+  secret     String
+  events     WebhookEvent[]
+  createdAt  DateTime    @default(now())
+
+  user         User?         @relation(fields: [userId], references: [id])
+  organization Organization? @relation(fields: [organizationId], references: [id])
+
+  @@index([userId])
+  @@index([organizationId])
+}
+
+model Integration {
+  id         String           @id @default(cuid())
+  userId     String
+  type       IntegrationType
+  configJson Json
+  createdAt  DateTime         @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model VerificationRequest {
+  id                String   @id @default(cuid())
+  organizationId    String
+  contactEmail      String
+  evidenceUrlsJson  Json?
+  status            VerificationStatus @default(PENDING)
+  reviewerId        String?
+  createdAt         DateTime @default(now())
+  reviewedAt        DateTime?
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  reviewer     User?        @relation("VerificationReviewer", fields: [reviewerId], references: [id])
+
+  @@index([status])
+}
+
+model AuditLog {
+  id         String    @id @default(cuid())
+  actorType  ActorType
+  actorUserId String?
+  actorOrganizationId String?
+  action     String
+  targetType String
+  targetId   String
+  diffJson   Json?
+  createdAt  DateTime  @default(now())
+
+  user         User?         @relation("UserAuditLogs", fields: [actorUserId], references: [id])
+  organization Organization? @relation("OrgAuditLogs", fields: [actorOrganizationId], references: [id])
+
+  @@index([actorType])
+  @@index([actorUserId])
+  @@index([actorOrganizationId])
+  @@index([targetType, targetId])
+}
+
+model ViewLog {
+  id          String   @id @default(cuid())
+  statementId String
+  userId      String?
+  ipHash      String
+  createdAt   DateTime @default(now())
+
+  statement Statement @relation(fields: [statementId], references: [id], onDelete: Cascade)
+  user      User?     @relation(fields: [userId], references: [id])
+
+  @@index([statementId, createdAt])
+}
+
+model BillingSubscription {
+  id               String   @id @default(cuid())
+  userId           String?
+  organizationId   String?
+  stripeCustomerId String
+  stripeSubId      String?
+  plan             Plan
+  status           String
+  currentPeriodEnd DateTime?
+
+  user         User?         @relation(fields: [userId], references: [id])
+  organization Organization? @relation(fields: [organizationId], references: [id])
+
+  @@index([plan])
+}
+
+// =========================
+// NextAuth adapter models
+// =========================
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?  @db.Text
+  access_token      String?  @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?  @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+// Dev helper to surface magic links without SMTP
+model MagicLinkLog {
+  id        String   @id @default(cuid())
+  email     String
+  url       String
+  createdAt DateTime @default(now())
+
+  @@index([email, createdAt])
+}
+
+// Notes:
+// - Some ownership/one-of relations (ApiKey, WebhookEndpoint, BillingSubscription) are validated at the app level.
+// - FTS tsvector fields (titleVector, contentVector) will be created via SQL triggers in a separate migration.
